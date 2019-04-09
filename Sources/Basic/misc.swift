@@ -163,13 +163,23 @@ public enum SystemError: Swift.Error {
     case waitpid(Int32)
 }
 
+#if os(Windows)
+import func SPMLibc._strerror_s
+#else
 import func SPMLibc.strerror_r
+#endif
 import var SPMLibc.EINVAL
 import var SPMLibc.ERANGE
 
 extension SystemError: CustomStringConvertible {
     public var description: String {
         func strerror(_ errno: Int32) -> String {
+#if os(Windows)
+            let cap = 128
+            var buf = [Int8](repeating: 0, count: cap)
+            let err = SPMLibc._strerror_s(&buf, 128, errno)
+            return "\(String(cString: buf)) (\(errno))"
+#else
             var cap = 64
             while cap <= 16 * 1024 {
                 var buf = [Int8](repeating: 0, count: cap)
@@ -187,6 +197,7 @@ extension SystemError: CustomStringConvertible {
                 return "\(String(cString: buf)) (\(errno))"
             }
             fatalError("strerror_r error: \(ERANGE)")
+#endif
         }
 
         switch self {
