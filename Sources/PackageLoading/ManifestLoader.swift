@@ -541,6 +541,7 @@ public final class ManifestLoader: ManifestLoaderProtocol {
 }
 
 /// Returns the sandbox profile to be used when parsing manifest on macOS.
+#if canImport(Darwin)
 private func sandboxProfile(_ cacheDir: AbsolutePath? = nil) -> String {
     let stream = BufferedOutputByteStream()
     stream <<< "(version 1)" <<< "\n"
@@ -564,6 +565,7 @@ private func sandboxProfile(_ cacheDir: AbsolutePath? = nil) -> String {
     stream <<< ")" <<< "\n"
     return stream.bytes.description
 }
+#endif
 
 extension Result where ErrorType == StringError {
     /// Create an instance of Result<Value, StringError>.

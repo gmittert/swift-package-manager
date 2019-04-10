@@ -828,6 +828,7 @@ private func getEnvBuildPath(workingDir: AbsolutePath) -> AbsolutePath? {
 }
 
 /// Returns the sandbox profile to be used when parsing manifest on macOS.
+#if canImport(Darwin)
 private func sandboxProfile(allowedDirectories: [AbsolutePath]) -> String {
     let stream = BufferedOutputByteStream()
     stream <<< "(version 1)" <<< "\n"
@@ -858,6 +859,7 @@ private func sandboxProfile(allowedDirectories: [AbsolutePath]) -> String {
     stream <<< ")" <<< "\n"
     return stream.bytes.description
 }
+#endif
 
 extension BuildConfiguration: StringEnumArgument {
     public static var completion: ShellCompletion = .values([

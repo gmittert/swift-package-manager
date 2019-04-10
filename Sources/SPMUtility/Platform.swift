@@ -1,9 +1,9 @@
 /*
  This source file is part of the Swift.org open source project
- 
+
  Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
  Licensed under Apache License v2.0 with Runtime Library Exception
- 
+
  See http://swift.org/LICENSE.txt for license information
  See http://swift.org/CONTRIBUTORS.txt for Swift project authors
 */
@@ -15,7 +15,8 @@ import Foundation
 public enum Platform {
     case darwin
     case linux(LinuxFlavor)
-    
+    case windows
+
     /// Recognized flavors of linux.
     public enum LinuxFlavor {
         case debian
@@ -25,6 +26,9 @@ public enum Platform {
     public static var currentPlatform = Platform.findCurrentPlatform()
     /// Attempt to match `uname` with recognized platforms.
     private static func findCurrentPlatform() -> Platform? {
+      #if os(Windows)
+        return .windows
+      #else
         guard let uname = try? Process.checkNonZeroExit(args: "uname").spm_chomp().lowercased() else { return nil }
         switch uname {
         case "darwin":
@@ -37,8 +41,10 @@ public enum Platform {
             return nil
         }
         return nil
+      #endif
     }
 
+  #if canImport(Darwin)
     /// Returns the cache directories used in Darwin.
     public static func darwinCacheDirectories() -> [AbsolutePath] {
         if let value = Platform._darwinCacheDirectories {
@@ -69,4 +75,5 @@ public enum Platform {
         guard value.hasSuffix(AbsolutePath.root.pathString) else { return nil }
         return resolveSymlinks(AbsolutePath(value))
     }
+  #endif
 }
