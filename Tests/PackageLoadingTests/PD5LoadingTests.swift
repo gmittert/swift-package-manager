@@ -415,4 +415,29 @@ class PackageDescription5LoadingTests: XCTestCase {
             XCTAssertEqual(errors, ["cSettings cannot be an empty array; provide at least one setting or remove it"])
         }
     }
+
+    func testWindowsPlatform() throws {
+        var stream = BufferedOutputByteStream()
+        stream <<< """
+            import PackageDescription
+            let package = Package(
+               name: "Foo",
+               targets: [
+                   .target(
+                       name: "Foo",
+                       cSettings: [
+                           .define("LLVM_ON_WIN32", .when(platforms: [.windows])),
+                       ]
+                   ),
+               ]
+            )
+            """
+
+        do {
+            try loadManifestThrowing(stream.bytes) { _ in }
+            XCTFail("Unexpected success")
+        } catch ManifestParseError.runtimeManifestErrors(let errors) {
+            XCTAssertEqual(errors, ["failed to load the Windows platform"])
+        }
+    }
 }
